@@ -1,8 +1,6 @@
 package raingor.ru.userservice.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "user", schema = "public")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String avatar_url;
@@ -21,4 +20,7 @@ public class User {
     private String name;
 
     private String email;
+
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
 }
