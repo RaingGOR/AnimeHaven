@@ -2,7 +2,6 @@ package raingor.ru.userservice.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import raingor.ru.userservice.domain.Role;
 import raingor.ru.userservice.domain.User;
