@@ -20,10 +20,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-    }
-
     public List<UserInfoDTO> getUsers(Pageable pageable) {
         return userRepository.findAll(pageable).stream().map(userMapper::userToUserInfoDTO).toList();
     }
@@ -45,8 +41,8 @@ public class UserService {
         if (user.getEmail() != null) {
             Optional<User> existingUser = userRepository.findByEmail(updatedUser.email());
 
-            if (existingUser.isEmpty() || existingUser.get().getEmail().equals(user.getEmail())) {
-                user.setEmail(user.getEmail());
+            if (existingUser.isEmpty()) {
+                user.setEmail(updatedUser.email());
             } else throw new UserExistsWithThisEmailException();
         }
 
