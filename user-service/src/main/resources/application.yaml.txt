@@ -16,3 +16,13 @@ spring:
     baseline-description: "init"
     locations: classpath:db/migration
     default-schema: flyway_schema
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

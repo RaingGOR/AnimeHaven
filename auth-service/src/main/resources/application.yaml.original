@@ -1,16 +1,40 @@
 spring:
   application:
     name: auth-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/animeHavenAuthService
+    username: your username
+    password: your password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-description: "init"
+    locations: classpath:db/migration
+    default-schema: flyway_schema
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: your_client_id
-            client-secret: your_client_secret
+            client-id: your client-id
+            client-secret: your client-secret
             redirect-uri: "http://localhost:8080/auth/google/callback"
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+server:
+  port: 8082
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

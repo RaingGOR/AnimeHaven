@@ -3,6 +3,7 @@ plugins {
 	id("io.spring.dependency-management")
 	id("java")
 }
+val springCloudVersion by extra("2024.0.0")
 
 repositories {
 	mavenCentral()
@@ -17,8 +18,9 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-database-postgresql")
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-	implementation("org.projectlombok:lombok")
 	implementation("com.auth0:java-jwt:4.4.0")
+	implementation("org.projectlombok:lombok")
+	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
@@ -31,6 +33,11 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
+	}
 }
 
 tasks.withType<Test> {

@@ -111,6 +111,18 @@ public class GoogleAuthService {
                 .block();
     }
 
+    public Map<String, Object> fetchGoogleUserInfo(HttpServletRequest request) {
+        String accessToken = (String) request.getSession().getAttribute("oauth2State");
+
+        return webClient.get()
+                .uri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .header("Authorization", "Bearer " + accessToken)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .block();
+    }
+
     // csrf
     private String generateSecureState() {
         byte[] randomBytes = new byte[32];
