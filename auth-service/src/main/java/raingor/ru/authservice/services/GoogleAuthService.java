@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,18 +18,18 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import raingor.ru.authservice.jwt.JwtUtil;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class GoogleAuthService {
     private final WebClient webClient = WebClient.create();
+    private final EurekaDiscoveryClient discoveryClient;
+    private final JwtUtil jwtUtil;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
@@ -62,6 +64,7 @@ public class GoogleAuthService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid state");
         }
 
+        //get tokens
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("code", code);
         formData.add("state", state);
@@ -86,20 +89,21 @@ public class GoogleAuthService {
         System.out.println("accessToken: " + accessToken + ", idToken: " + idToken + ", refreshToken: " + refreshToken);
 
         Map<String, Object> userInfo = fetchGoogleUserInfo(accessToken);
+        String email = (String) userInfo.get("email");
+        Map<String, Object> userResponse = checkUserExists(email);
 
-        return ResponseEntity.ok("Google OAuth2 Success. accessToken=" + accessToken);
+        //check in user-service
+        if (userResponse != null && userResponse.containsKey("user")) {
+            Map<String, Object> user = (Map<String, Object>) userResponse.get("user");
+            String userToken = jwtUtil.generateUserToken(user);
+            return ResponseEntity.ok("Login successful. Token: " + userToken);
+        } else {
+            Map<String, Object> newUser = createUserInUserService(userInfo);
+            String userToken = jwtUtil.generateUserToken(newUser);
+            return ResponseEntity.ok("Registration successful. Token: " + userToken);
+        }
     }
 
-    // need add validate
-    private Map<String, Object> parseToken(String token) {
-        return webClient.get()
-                .uri("https://www.googleapis.com/oauth2/v3/userinfo")
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .block();
-    }
 
     private Map<String, Object> fetchGoogleUserInfo(String accessToken) {
         return webClient.get()
@@ -138,5 +142,49 @@ public class GoogleAuthService {
         request.getSession().removeAttribute("oauth2State");
 
         return storedState != null && storedState.equals(state);
+    }
+
+    // get url user service from Eureka
+    private String getUserServiceUrl() {
+        List<ServiceInstance> instances = discoveryClient.getInstances("user-service");
+        if (instances.isEmpty()) {
+            throw new RuntimeException("User service not found");
+        }
+        return instances.get(0).getUri().toString();
+    }
+
+    // check exist user in db
+    public Map<String, Object> checkUserExists(String email) {
+        String userServiceUrl = getUserServiceUrl();
+        return webClient.get()
+                .uri(userServiceUrl + "/api/users/check?email=" + email)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .block();
+    }
+
+    // create new user
+    public Map<String, Object> createUserInUserService(Map<String, Object> userInfo) {
+        String userServiceUrl = getUserServiceUrl();
+        return webClient.post()
+                .uri(userServiceUrl + "/api/users/create")
+                .bodyValue(userInfo)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .block();
+    }
+
+    // need add validate
+    @Deprecated
+    private Map<String, Object> parseToken(String token) {
+        return webClient.get()
+                .uri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .header("Authorization", "Bearer " + token)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .block();
     }
 }

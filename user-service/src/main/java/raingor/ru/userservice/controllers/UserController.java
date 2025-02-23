@@ -8,6 +8,7 @@ import raingor.ru.userservice.dtos.UserInfoDTO;
 import raingor.ru.userservice.services.UserService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,6 +39,16 @@ public class UserController {
     public HttpStatus updateUser(@PathVariable Long id, @RequestBody UserInfoDTO user) {
         userService.updateUserById(id, user);
         return HttpStatus.NO_CONTENT;
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<?> checkUser(@RequestParam String email){
+        return userService.checkUser(email);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createUser(@RequestBody Map<String, Object> userInfo) {
+        return userService.createUser(userInfo);
     }
 
     //in future if user banned we need set invisible mode on "banned user"

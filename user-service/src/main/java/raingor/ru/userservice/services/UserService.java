@@ -2,6 +2,8 @@ package raingor.ru.userservice.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import raingor.ru.userservice.domain.Role;
 import raingor.ru.userservice.domain.User;
@@ -11,7 +13,9 @@ import raingor.ru.userservice.exceptions.UserNotFoundException;
 import raingor.ru.userservice.mappers.UserMapper;
 import raingor.ru.userservice.repositories.UserRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -47,5 +51,30 @@ public class UserService {
         }
 
         userRepository.save(user);
+    }
+
+    public ResponseEntity<?> checkUser(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", user.get());
+            return ResponseEntity.ok(response);
+
+        } else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+    }
+
+    public ResponseEntity<?> createUser(Map<String, Object> userInfo) {
+        User newUser = new User();
+
+        newUser.setEmail((String) userInfo.get("email"));
+        newUser.setName((String) userInfo.get("name"));
+        newUser.setAvatar_url((String) userInfo.get("picture"));
+        newUser.setRole(Role.USER);
+
+        userRepository.save(newUser);
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", newUser);
+        return ResponseEntity.ok(response);
     }
 }

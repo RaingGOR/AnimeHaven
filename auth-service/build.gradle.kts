@@ -18,8 +18,8 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-database-postgresql")
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-	implementation("com.auth0:java-jwt:4.4.0")
 	implementation("org.projectlombok:lombok")
+	implementation("com.auth0:java-jwt:4.4.0")
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
 	compileOnly("org.projectlombok:lombok")
