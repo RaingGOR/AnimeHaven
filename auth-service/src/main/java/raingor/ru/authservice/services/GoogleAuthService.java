@@ -146,7 +146,7 @@ public class GoogleAuthService {
 
     // get url user service from Eureka
     private String getUserServiceUrl() {
-        List<ServiceInstance> instances = discoveryClient.getInstances("user-service");
+        List<ServiceInstance> instances = discoveryClient.getInstances("USER-SERVICE");
         if (instances.isEmpty()) {
             throw new RuntimeException("User service not found");
         }

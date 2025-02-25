@@ -21,6 +21,9 @@ dependencies {
 	implementation("org.projectlombok:lombok")
 	implementation("com.auth0:java-jwt:4.4.0")
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+	implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
+
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")

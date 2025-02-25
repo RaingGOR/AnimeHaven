@@ -13,9 +13,9 @@ public class ServiceUrls {
     private final EurekaDiscoveryClient discoveryClient;
 
     public String getAuthServiceUrl() {
-        List<ServiceInstance> instances = discoveryClient.getInstances("auth-service");
+        List<ServiceInstance> instances = discoveryClient.getInstances("AUTH-SERVICE");
         if (instances.isEmpty()) {
-            throw new RuntimeException("User service not found");
+            throw new RuntimeException("Auth service not found");
         }
         return instances.get(0).getUri().toString();
     }
